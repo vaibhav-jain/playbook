@@ -8,11 +8,26 @@ st.write("""# Simple Iris Flower Prediction app""")
 
 st.sidebar.header("User Input Parameters")
 
-# List of classifiers
-classifiers = [
-    "RandomForestClassifier",
-    "GradientBoostingClassifier",
-]
+# classifiers and their dotted module path
+classifiers = {
+    "RandomForestClassifier": "sklearn.ensemble",
+    "GradientBoostingClassifier": "sklearn.ensemble",
+    "KNeighborsClassifier": "sklearn.neighbors",
+    "RadiusNeighborsClassifier": "sklearn.neighbors"
+}
+
+
+def import_classifier(classifier):
+    """
+    This function takes classifier name and
+     returns its imported class
+    :param classifier:
+    :return:
+    """
+    return getattr(
+        import_module(classifiers[classifier]),
+        classifier
+    )
 
 
 def get_input_features():
@@ -20,7 +35,7 @@ def get_input_features():
     sepal_width = st.sidebar.slider("Sepal width", 0.0, 10.0, 3.4)
     petal_length = st.sidebar.slider("Petal length", 0.0, 10.0, 1.3)
     petal_width = st.sidebar.slider("Petal width", 0.0, 10.0, 0.2)
-    classifier = st.sidebar.selectbox("Select Classifier", classifiers, 0)
+    classifier = st.sidebar.selectbox("Select Classifier", list(classifiers.keys()), 0)
 
     data = {
         "sepal_length": sepal_length,
@@ -43,10 +58,8 @@ iris = datasets.load_iris()
 x = iris.data
 y = iris.target
 
-import_classifier_class = getattr(import_module("sklearn.ensemble"),
-                                  selected_classifier
-                                  )
-clf = import_classifier_class()
+imported_classifier_class = import_classifier(selected_classifier)
+clf = imported_classifier_class()
 clf.fit(x, y)
 
 prediction = clf.predict(df)
